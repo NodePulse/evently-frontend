@@ -60,13 +60,13 @@ export default function Page() {
     // ✅ Formik setup
     const formik = useFormik({
         initialValues: {
-            name: "",
+            username: "",
             email: "",
             password: "",
         },
         validationSchema: loginFormValidations,
         onSubmit: (val) => {
-            userRegister({ name: val.name, email: val.email, password: val.password });
+            userRegister({ username: val.username, email: val.email, password: val.password });
             console.log(val)
         },
     });
@@ -91,12 +91,12 @@ export default function Page() {
                     <form onSubmit={formik.handleSubmit} className="space-y-5">
                         {/* Email */}
                         <div className="space-y-2">
-                            <Label htmlFor="name">Name</Label>
+                            <Label htmlFor="username">Username</Label>
                             <Input
-                                id="name"
+                                id="username"
                                 type="text"
                                 placeholder="John Doe"
-                                {...formik.getFieldProps("name")}
+                                {...formik.getFieldProps("username")}
                             />
                             {/* {formik.touched.email && formik.errors.email && (
                 <p className="text-sm text-red-500">{formik.errors.email}</p>
@@ -143,7 +143,7 @@ export default function Page() {
 
                         {/* Submit */}
                         <Button type="submit" className="w-full" disabled={isPending}>
-                            {isPending ? "Logging in..." : "Login"}
+                            {isPending ? "Registering..." : "Register"}
                         </Button>
                     </form>
 

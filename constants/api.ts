@@ -3,12 +3,14 @@ import {
   CREATE_EVENT,
   FORGOT_PASSWORD,
   GET_ALL_EVENTS,
+  GET_ALL_TRANSACTIONS,
   GET_EVENT,
   GET_EVENTS,
   GET_ME,
   GET_ORGANIZED_EVENTS,
   GET_USER,
   GET_USER_EVENTS,
+  UPDATE_PROFILE_IMAGE,
   USER_LOGIN,
   USER_REGISTER,
   VERIFY_OTP,
@@ -48,6 +50,7 @@ export const userRegisterFn = async (payload: UserRegisterPayload) => {
 export const getMeFn = async () => {
   try {
     const response = await api.get(GET_ME);
+    console.log(response.data)
     return response.data;
   } catch (error) {
     if (axios.isAxiosError(error) && error.response) {
@@ -150,9 +153,9 @@ export const getEventFn = async (id: string) => {
   }
 };
 
-export const eventRegistrationFn = async (id: string) => {
+export const eventRegistrationFn = async (id: string, payload: any) => {
   try {
-    const response = await api.post(`${GET_EVENT}/${id}/register`);
+    const response = await api.post(`${GET_EVENT}/${id}/register`, payload);
     return response.data;
   } catch (error) {
     if (axios.isAxiosError(error) && error.response) {
@@ -236,6 +239,35 @@ export const getOrganizedEventsFn = async () => {
       throw new Error(backendErrorMessage);
     }
 
+    throw new Error("An unexpected error occurred.");
+  }
+};
+
+export const updateProfileImageFn = async (payload: FormData) => {
+  try {
+    const response = await api.put(UPDATE_PROFILE_IMAGE, payload);
+    return response.data;
+  } catch (error) {
+    if (axios.isAxiosError(error) && error.response) {
+      const backendErrorMessage = error.response.data.error;
+
+      throw new Error(backendErrorMessage);
+    }
+
+    throw new Error("An unexpected error occurred.");
+  }
+};
+
+export const getAllTransactionsFn = async () => {
+  try {
+    const response = await api.get(GET_ALL_TRANSACTIONS);
+    return response.data;
+  } catch (error) {
+    if (axios.isAxiosError(error) && error.response) {
+      const backendErrorMessage = error.response.data.error;
+
+      throw new Error(backendErrorMessage);
+    }
     throw new Error("An unexpected error occurred.");
   }
 };

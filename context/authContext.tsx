@@ -2,9 +2,15 @@
 
 import { getMeFn } from "@/constants/api";
 import api from "@/constants/axios";
-import { useMutation } from "@tanstack/react-query";
-import { useRouter } from "next/navigation";
-import React, { createContext, useContext, useState, ReactNode, useEffect, useCallback } from "react";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { usePathname, useRouter } from "next/navigation";
+import React, {
+  createContext,
+  useContext,
+  useState,
+  ReactNode,
+  useEffect,
+} from "react";
 
 export interface User {
   id: string;
@@ -24,7 +30,7 @@ interface UserContextType {
   setUser: (user: User | null) => void;
   login: (user: User) => void;
   logout: () => void;
-  getMe: () => void;
+  getMe: any;
 }
 
 const UserContext = createContext<UserContextType | undefined>(undefined);
@@ -32,44 +38,54 @@ const UserContext = createContext<UserContextType | undefined>(undefined);
 export const UserProvider = ({ children }: { children: ReactNode }) => {
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
-  const router = useRouter()
+  const router = useRouter();
+  const pathname = usePathname();
+  const queryClient = useQueryClient();
 
-  const { mutate: getMe } = useMutation({
-    mutationFn: getMeFn,
-    onSuccess: (data) => {
-      setUser(data)
-      setLoading(false)
-    },
-    onError: () => {
-      setUser(null)
-      setLoading(false)
-    }
-  })
-
-  // Run once when provider mounts
-  useEffect(() => {
-    getMe();
-  }, []);
+  const { data: getMe, isLoading } = useQuery({
+    queryKey: ["me", user],
+    queryFn: getMeFn,
+  });
 
   useEffect(() => {
-    const publicRoutes = ["/", "/login", "/register", "/forgot-password", "/verify-otp"];
-    const path = window.location.pathname;
-    if (!loading && !user && !publicRoutes.includes(path)) {
-      router.push("/");
+    const publicRoutes = [
+      "/",
+      "/login",
+      "/register",
+      "/forgot-password",
+      "/verify-otp",
+    ];
+
+    if (isLoading) {
+      setLoading(true);
+      return;
     }
-  }, [user, loading, router]);
+
+    if (!user) {
+      if (getMe?.data) {
+        setUser(getMe.data);
+      } else {
+        if (!publicRoutes.includes(pathname)) {
+          router.push("/");
+        }
+      }
+    }
+    setLoading(false);
+  }, [getMe, isLoading, pathname, router, user]);
 
   // Set user after successful login
   const login = (userData: User) => {
-    setUser(userData)
+    setUser(userData);
+    queryClient.setQueryData(["me"], { data: userData });
   };
 
   // Logout and clear state
   const logout = async () => {
     try {
-      await api.post("/user/auth/logout");
+      await api.post("/auth/users/logout");
+      queryClient.removeQueries({ queryKey: ["me"] });
       setUser(null);
-      router.push("/login")
+      router.push("/");
     } catch (err) {
       console.error(err);
     }
@@ -80,11 +96,13 @@ export const UserProvider = ({ children }: { children: ReactNode }) => {
       <div className="h-screen w-full flex justify-center items-center">
         <h2>Loading...</h2>
       </div>
-    )
+    );
   }
 
   return (
-    <UserContext.Provider value={{ user, setUser, login, logout, getMe }}>
+    <UserContext.Provider
+      value={{ user, setUser, login, logout, getMe: user }}
+    >
       {children}
     </UserContext.Provider>
   );

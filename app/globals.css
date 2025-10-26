@@ -118,6 +118,18 @@
   --sidebar-ring: oklch(0.75 0.18 190);
 }
 
+body {
+  padding: 0;
+  margin: 0;
+  box-sizing: border-box
+}
+
+html, body {
+  height: 100%;
+  margin: 0;
+  overflow: hidden; /* Prevent double scrollbars */
+}
+
 @layer base {
   * {
     @apply border-border outline-ring/50;
@@ -148,4 +160,31 @@
 
 *::-webkit-scrollbar {
   display: none; /* Chrome, Safari, Opera */
+}
+
+.animate-pulse {
+  animation: pulse 2s cubic-bezier(0.4, 0, 0.2, 1) infinite;
+}
+
+/* Online dot indicator styles */
+.online-dot {
+  position: absolute;
+  z-index: 20;
+  bottom: 0;
+  right: 0;
+  width: 12px;
+  height: 12px;
+  background-color: #10b981;
+  border: 2px solid white;
+  border-radius: 50%;
+  transform: translate(30%, 30%); /* moves it slightly outside for visibility */
+}
+
+.online-dot.offline {
+  background-color: #6b7280; /* Gray color for offline status */
+}
+
+.avatar-container {
+  position: relative;
+  display: inline-block;
 }

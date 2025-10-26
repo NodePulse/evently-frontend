@@ -2,8 +2,7 @@
 
 import { useState } from "react";
 import Sidebar from "@/components/Sidebar";
-import { Button } from "@/components/ui/button";
-import { Menu } from "lucide-react";
+import { Header } from "@/components/Header"; // Import the shared Header
 
 export default function PrivateLayout({
   children,
@@ -15,17 +14,17 @@ export default function PrivateLayout({
   return (
     <div className="grid h-screen w-full md:grid-cols-[220px_1fr] lg:grid-cols-[280px_1fr] overflow-hidden">
       {/* Sidebar for larger screens */}
-      <div className="hidden md:block h-screen overflow-y-auto bg-background border-r">
+      <div className="hidden border-r bg-background md:block">
         <Sidebar />
       </div>
 
       {/* Sidebar drawer for small screens */}
       <div
-        className={`fixed inset-y-0 left-0 z-50 w-64 bg-background transform transition-transform duration-300 ease-in-out md:hidden border-r ${
+        className={`fixed inset-y-0 left-0 z-50 w-64 transform border-r bg-background transition-transform duration-300 ease-in-out md:hidden ${
           sidebarOpen ? "translate-x-0" : "-translate-x-full"
         }`}
       >
-        <Sidebar />
+        <Sidebar setSidebarOpen={setSidebarOpen} />
       </div>
 
       {/* Overlay when sidebar open */}
@@ -36,21 +35,18 @@ export default function PrivateLayout({
         />
       )}
 
-      {/* Main content */}
-      <div className="flex flex-col h-screen overflow-hidden">
-        {/* Top bar for mobile */}
-        <header className="flex items-center justify-between p-4 border-b bg-background md:hidden">
-          <Button
-            variant="outline"
-            size="icon"
-            onClick={() => setSidebarOpen(!sidebarOpen)}
-          >
-            <Menu className="h-5 w-5" />
-          </Button>
-          <h1 className="text-lg font-semibold">Dashboard</h1>
+      {/* Main content area */}
+      <div className="flex flex-col h-screen overflow-hidden bg-muted/40">
+        {/* Fixed Header */}
+        <header className="fixed top-0 left-0 right-0 z-50 bg-background border-b md:left-[220px] lg:left-[280px]">
+          <Header
+            onSidebarToggle={() => setSidebarOpen(!sidebarOpen)}
+            sidebarOpen={sidebarOpen}
+          />
         </header>
 
-        <main className="flex-1 overflow-y-auto p-4 lg:p-6 lg:pt-0 bg-muted/40">
+        {/* Main content with padding to avoid header overlap */}
+        <main className="flex-1 overflow-y-auto px-4 pt-[72px] md:pt-[80px]">
           {children}
         </main>
       </div>

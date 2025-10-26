@@ -42,7 +42,7 @@ export default function Page() {
     if (user) {
       router.push("/dashboard"); // client-side redirect without page reload
     }
-  }, [user, router]);
+  }, [user, router, login]);
 
   // ✅ React Query mutation
   const { mutate: userLogin, isPending } = useMutation({

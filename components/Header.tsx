@@ -1,180 +1,106 @@
 "use client";
 
-import React, { useState } from "react";
-import { useUser } from "@/context/authContext";
-import { Avatar, AvatarFallback } from "./ui/avatar";
-import { Popover, PopoverContent, PopoverTrigger } from "./ui/popover";
-import { Button } from "./ui/button";
-import { motion } from "framer-motion";
-import {
-  Dialog,
-  DialogClose,
-  DialogContent,
-  DialogDescription,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-} from "./ui/dialog";
-import { Input } from "./ui/input";
-import { Label } from "./ui/label";
+import { Menu, Bell, X, ChevronRight } from "lucide-react"; // Make sure to import the X icon
+import { Button } from "@/components/ui/button";
+import { usePathname } from "next/navigation";
+import Link from "next/link";
 
-const Header = () => {
-  const { user, logout } = useUser();
-  const [isProfileOpen, setProfileOpen] = useState(false);
-  const [isSettingsOpen, setSettingsOpen] = useState(false);
+// Define the props the Header will accept
+interface HeaderProps {
+  onSidebarToggle: () => void;
+  sidebarOpen: boolean;
+}
+
+export const Header = ({ onSidebarToggle, sidebarOpen }: HeaderProps) => {
+  // A flag to show the notification dot. You can wire this up to your app's state.
+  const hasNewNotification = true;
+  const pathname = usePathname();
+  console.log(pathname);
+
+  const showTitle = [
+    { title: "Dashboard", path: "/dashboard" },
+    { title: "Events", path: "/explore" },
+    { title: "Create New Event", path: "/createEvent" },
+    { title: "My Events", path: "/my-events" },
+    { title: "Events I'm Attending", path: "/attending-events" },
+    { title: "Profile Settings", path: "/profile" },
+    { title: "Logout", path: "/logout" },
+  ]
+
+  const generateTitle = (path: string) => {
+    // First, try to find an exact match for the whole path.
+    // This is the most efficient way to handle static routes like "/dashboard" or "/profile".
+    const exactMatch = showTitle.find(item => item.path === path);
+    if (exactMatch) {
+      return exactMatch.title;
+    }
+
+    const pathParts = path.split('/').filter(Boolean); // e.g., ['explore', 'some-event-id']
+
+    // Handle special dynamic paths like /explore/:id
+    if (pathParts[0] === 'events' && pathParts.length > 1) {
+      return (
+        <div className="flex items-center gap-1 text-2xl">
+          <Link href="/explore" className="text-muted-foreground hover:text-foreground">
+            Events
+          </Link>
+          <ChevronRight className="h-5 w-5 text-muted-foreground font-semibold" />
+          {
+            showTitle.find(item => item.path === `/events/${pathParts[1]}`)?.title || "Event Details"
+          }
+        </div>
+      );
+    }
+
+    // Handle the root path, which defaults to Dashboard
+    if (pathParts.length === 0) {
+        return "Dashboard";
+    }
+
+    // Fallback for any other multi-part paths (e.g., /settings/security)
+    return pathParts
+      .map(part => part.charAt(0).toUpperCase() + part.slice(1).replace(/-/g, ' '))
+      .join(' > ');
+  };
 
   return (
-    <header className="backdrop-blur-lg bg-gray-900/80 text-white px-6 py-4 flex justify-between items-center shadow-md sticky top-0 z-50">
-      {/* Logo */}
-      <motion.div
-        whileHover={{ scale: 1.05 }}
-        className="text-2xl font-extrabold tracking-wide cursor-pointer"
+    <header className="flex h-14 items-center justify-between bg-gradient-to-b from-background to-transparent px-4 sm:px-6">
+      {/* This button is now only visible on mobile screens.
+        It switches between the Menu and X icon.
+      */}
+      <Button
+        onClick={onSidebarToggle}
+        variant="ghost"
+        size="icon"
+        aria-label="Toggle sidebar"
+        className="md:hidden" // Hides the toggle on desktop where the sidebar is always visible
       >
-        Evently
-      </motion.div>
+        <Menu className="h-6 w-6" />
+      </Button>
 
-      {/* Navigation */}
-      <nav className="space-x-6 text-lg hidden md:flex">
-        {["Home", "About", "Dashboard"].map((link) => (
-          <a
-            key={link}
-            href={link === "Home" ? "/" : `/${link.toLowerCase()}`}
-            className="relative group"
-          >
-            <span className="hover:text-blue-400 transition-colors">
-              {link}
-            </span>
-            <span className="absolute left-0 -bottom-1 w-0 h-[2px] bg-blue-400 transition-all group-hover:w-full"></span>
-          </a>
-        ))}
-      </nav>
+      {pathname && <div className="hidden md:block text-2xl font-semibold px-2">{generateTitle(pathname)}</div>}
 
-      {/* User Section */}
+      {/* An empty div to correctly align the notification icon to the right on desktop */}
+      <div className="hidden md:block" />
+
+      {/* Notification Icon */}
       <div>
-        {user ? (
-          <Popover>
-            <PopoverTrigger asChild>
-              <Avatar className="cursor-pointer ring-2 ring-blue-500 hover:ring-blue-400 transition">
-                <AvatarFallback className="bg-yellow-500">
-                  {user.name?.charAt(0).toUpperCase() || "U"}
-                </AvatarFallback>
-              </Avatar>
-            </PopoverTrigger>
-            <PopoverContent className="w-48 p-2 bg-gray-800 text-white rounded-xl shadow-lg">
-              <div className="flex flex-col gap-2">
-                {/* Profile Dialog */}
-                <Dialog open={isProfileOpen} onOpenChange={setProfileOpen}>
-                  <DialogTrigger asChild>
-                    <Button
-                      variant="ghost"
-                      className="justify-start hover:bg-blue-500 hover:text-white rounded-lg"
-                    >
-                      Profile
-                    </Button>
-                  </DialogTrigger>
-                  <DialogContent>
-                    <DialogHeader>
-                      <DialogTitle>Your Profile</DialogTitle>
-                      <DialogDescription>
-                        Here are your personal details.
-                      </DialogDescription>
-                    </DialogHeader>
-                    <div className="space-y-3 mt-2">
-                      <p>
-                        <span className="font-semibold">Name:</span>{" "}
-                        {user.name || "Not Provided"}
-                      </p>
-                      <p>
-                        <span className="font-semibold">Email:</span>{" "}
-                        {user.email || "Not Provided"}
-                      </p>
-                      <p>
-                        <span className="font-semibold">Role:</span>{" "}
-                        {user.role || "User"}
-                      </p>
-                    </div>
-                    <DialogClose asChild>
-                      <Button variant="outline" onClick={() => setProfileOpen(false)}>Close</Button>
-                    </DialogClose>
-                  </DialogContent>
-                </Dialog>
-
-                {/* Settings (Change Password) Dialog */}
-                <Dialog open={isSettingsOpen} onOpenChange={setSettingsOpen}>
-                  <DialogTrigger asChild>
-                    <Button
-                      variant="ghost"
-                      className="justify-start hover:bg-blue-500 hover:text-white rounded-lg"
-                    >
-                      Settings
-                    </Button>
-                  </DialogTrigger>
-                  <DialogContent>
-                    <DialogHeader>
-                      <DialogTitle>Change Password</DialogTitle>
-                      <DialogDescription>
-                        Update your account password here.
-                      </DialogDescription>
-                    </DialogHeader>
-                    <form className="space-y-4">
-                      <div className="space-y-2">
-                        <Label htmlFor="currentPassword">Current Password</Label>
-                        <Input
-                          type="password"
-                          id="currentPassword"
-                          placeholder="Enter current password"
-                        />
-                      </div>
-                      <div className="space-y-2">
-                        <Label htmlFor="newPassword">New Password</Label>
-                        <Input
-                          type="password"
-                          id="newPassword"
-                          placeholder="Enter new password"
-                        />
-                      </div>
-                      <div className="space-y-2">
-                        <Label htmlFor="confirmPassword">
-                          Confirm New Password
-                        </Label>
-                        <Input
-                          type="password"
-                          id="confirmPassword"
-                          placeholder="Confirm new password"
-                        />
-                      </div>
-                      <Button type="submit" className="w-full bg-blue-500">
-                        Update Password
-                      </Button>
-                    </form>
-                    <DialogClose asChild>
-                      <Button variant="outline" onClick={() => setSettingsOpen(false)}>Close</Button>
-                    </DialogClose>
-                  </DialogContent>
-                </Dialog>
-
-                {/* Logout Button */}
-                <Button
-                  variant="ghost"
-                  onClick={logout}
-                  className="justify-start hover:bg-red-500 hover:text-white rounded-lg"
-                >
-                  Logout
-                </Button>
-              </div>
-            </PopoverContent>
-          </Popover>
-        ) : (
-          <a
-            href="/login"
-            className="bg-blue-500 px-4 py-2 rounded-lg hover:bg-blue-600 transition-colors shadow-md"
-          >
-            Login
-          </a>
-        )}
+        <Button
+          variant="ghost"
+          size="icon"
+          aria-label="View notifications"
+          className="relative"
+        >
+          <Bell className="h-6 w-6" />
+          {hasNewNotification && (
+            // This is the red "new notification" dot with a pulsing animation
+            <span className="absolute top-1.5 right-1.5 flex h-2.5 w-2.5">
+              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-75"></span>
+              <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-red-500"></span>
+            </span>
+          )}
+        </Button>
       </div>
     </header>
   );
 };
-
-export default Header;

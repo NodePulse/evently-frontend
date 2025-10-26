@@ -34,7 +34,7 @@ export const EventCard = ({ event }: { event: Event }) => {
 
     return (
         <Link href={`/events/${event.id}`} className="block">
-            <Card className="overflow-hidden hover:shadow-xl transition-shadow duration-300 group h-full flex flex-col">
+            <Card className="overflow-hidden hover:shadow-xl transition-shadow duration-300 group h-full flex flex-col py-0">
                 <CardHeader className="p-0 relative">
                     {/* Image container with a fixed aspect ratio */}
                     <div className="aspect-[16/9] relative w-full">

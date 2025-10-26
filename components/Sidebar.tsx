@@ -1,12 +1,12 @@
 'use client';
 
-import { Home, Calendar, Plus, User, LogOut, Compass } from "lucide-react";
+import { Home, Calendar, Plus, User, LogOut, Compass, X, History } from "lucide-react";
 import Link from "next/link";
 import { usePathname } from 'next/navigation';
 import { cn } from "@/lib/utils";
 import { ThemeToggle } from "./ThemeToggle";
 
-const Sidebar = ({ className }: { className?: string }) => {
+const Sidebar = ({ className, setSidebarOpen }: { className?: string, setSidebarOpen?: (open: boolean) => void }) => {
   const pathname = usePathname();
 
   const navLinks = [
@@ -29,6 +29,7 @@ const Sidebar = ({ className }: { className?: string }) => {
       title: "User Account",
       links: [
         { href: "/profile", label: "Profile Settings", icon: User },
+        { href: "/transactions", label: "Transaction History", icon: History },
         { href: "/logout", label: "Logout", icon: LogOut },
       ],
     },
@@ -37,10 +38,11 @@ const Sidebar = ({ className }: { className?: string }) => {
   return (
     <div className={cn("border-r bg-muted/40", className)}>
       <div className="flex h-full max-h-screen flex-col gap-2">
-        <div className="flex h-14 items-center border-b px-4 lg:h-[60px] lg:px-6">
+        <div className="flex h-14 items-center px-4 lg:h-[60px] lg:px-6 justify-between">
           <Link href="/" className="flex items-center gap-2 font-semibold">
             <span className="text-lg font-bold">Evently</span>
           </Link>
+          <X className="w-5 h-5 cursor-pointer lg:hidden" onClick={() => setSidebarOpen && setSidebarOpen(false)} />
         </div>
         <div className="flex-1 overflow-y-auto">
           <nav className="grid items-start px-2 text-sm font-medium lg:px-4">
@@ -59,6 +61,7 @@ const Sidebar = ({ className }: { className?: string }) => {
                         "flex items-center gap-3 rounded-lg px-3 py-2 text-muted-foreground transition-all hover:text-primary",
                         isActive && "bg-primary/10 text-primary"
                       )}
+                      onClick={() => setSidebarOpen && setSidebarOpen(false)}
                     >
                       <link.icon className="h-4 w-4" />
                       {link.label}

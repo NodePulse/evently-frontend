@@ -19,10 +19,12 @@ import { User } from "@/context/authContext";
 import { UserProfileSkeleton } from "@/components/UserProfileSkeleton";
 import { useState } from "react";
 import { EditProfileModal } from "./EditProfileModal";
+import { ChangeProfileImageModal } from "./ChangeProfileImageModal";
 
 // --- Main Page Component ---
 export default function UserProfilePage() {
     const [editProfileModalOpen, setEditProfileModalOpen] = useState(false);
+    const [editProfileImageModalOpen, setEditProfileImageModalOpen] = useState(false);
 
     const { data: user, isLoading: isUserLoading } = useQuery<User>({
         queryKey: ["user-profile"],
@@ -50,15 +52,16 @@ export default function UserProfilePage() {
 
     return (
         <>
-            <div className="container mx-auto max-w-6xl p-4 md:p-6">
+            <div className="container mx-auto max-w-6xl px-4 md:px-4 pb-6">
+                <h1 className="text-2xl font-bold flex md:hidden mb-2">Profile Settings</h1>
                 {/* --- NEW: Profile Header --- */}
-                <Card className="overflow-hidden">
+                <Card className="overflow-hidden py-0">
                     <div className="relative h-40 md:h-52 bg-muted">
                         {/* Cover Photo - assuming a field like user.coverImage exists */}
                         <Image src="/placeholder-cover.jpg" alt="Cover photo" fill className="object-cover" />
                     </div>
                     <div className="p-4 sm:p-6 flex flex-col sm:flex-row sm:items-end gap-4 -mt-16 sm:-mt-20 z-10 relative">
-                        <Avatar className="h-32 w-32 border-4 border-background">
+                        <Avatar className="h-32 w-32 border-4 border-background cursor-pointer" onClick={() => setEditProfileImageModalOpen(true)}>
                             <AvatarImage src={user.image} />
                             <AvatarFallback className="text-3xl">
                                 {user.name.split(" ").map((n) => n[0]).join("").toUpperCase()}
@@ -120,6 +123,7 @@ export default function UserProfilePage() {
                 </div>
             </div>
             <EditProfileModal user={user} isOpen={editProfileModalOpen} onClose={() => setEditProfileModalOpen(false)} />
+            <ChangeProfileImageModal isOpen={editProfileImageModalOpen} onClose={() => setEditProfileImageModalOpen(false)} currentImage={user.image} />
         </>
     );
 }

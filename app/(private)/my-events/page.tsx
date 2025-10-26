@@ -73,26 +73,9 @@ const MyEventsPage = () => {
 
   return (
     <>
-      <div className="space-y-4 py-2">
-        <div className="flex items-center justify-between">
-            <div className="flex items-center gap-4">
-                <Sheet>
-                    <SheetTrigger asChild>
-                    <Button
-                        variant="outline"
-                        size="icon"
-                        className="shrink-0 md:hidden"
-                    >
-                        <Menu className="h-5 w-5" />
-                        <span className="sr-only">Toggle navigation menu</span>
-                    </Button>
-                    </SheetTrigger>
-                    <SheetContent side="left" className="flex flex-col p-0">
-                        <Sidebar />
-                    </SheetContent>
-                </Sheet>
-                <h1 className="text-2xl font-bold">My Events</h1>
-            </div>
+      <div className="space-y-4 px-4">
+        <div className="flex items-center justify-between md:hidden">
+          <h1 className="text-2xl font-bold">My Events</h1>
           <Link href="/createEvent">
             <Button>
               <PlusCircle className="mr-2 h-4 w-4" />
